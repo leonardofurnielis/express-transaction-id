@@ -35,7 +35,7 @@ app.get('/foo', (req, res, next) => {
 });
 
 ```
-## req.getId\[type: function]
+### req.getId()
 
 This methods is added to the incoming request by `express-transaction-id`, and will allow you to get `transaction_id` of current request.
 
