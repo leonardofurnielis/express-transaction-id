@@ -1,180 +1,127 @@
-/* eslint-disable no-underscore-dangle */
-
 'use strict';
 
-const httpMocks = require('node-mocks-http');
-const errorHandler = require('../index');
+const request = require('supertest');
+const express = require('express');
+const correlationId = require('../index');
 
-describe('ErrorHandler()', () => {
-  test('When no args passed, should return default error object', async () => {
-    const req = httpMocks.createRequest();
-    const res = httpMocks.createResponse();
-    const error = new Error();
-
-    errorHandler()(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'INTERNAL_SERVER_ERROR',
-      status_code: 500,
+describe('Create new correlation ID', () => {
+  test('When use middleware, should add x-correlation-id to incoming request', async () => {
+    const app = express();
+    app.use(correlationId());
+    app.get('/', (req, res) => {
+      return res.status(200).json({ id: 'foo' });
     });
+
+    await request(app)
+      .get('/')
+      .expect((res) => {
+        expect(res.headers['x-correlation-id']).toBeDefined();
+      });
   });
 
-  test('When sent code 400, should return code 400', async () => {
-    const req = httpMocks.createRequest();
-    const res = httpMocks.createResponse();
-    const error = new Error();
-    error.code = 400;
-
-    errorHandler()(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'BAD_REQUEST',
-      status_code: 400,
+  test('When use custom header, should add custom header to incoming request', async () => {
+    const app = express();
+    app.use(correlationId({ header: 'x-transaction-id' }));
+    app.get('/', (req, res) => {
+      return res.status(200).json({ id: 'foo' });
     });
-  });
 
-  test('When sent code 400 with custom message, should return code 400 and custom message', async () => {
-    const req = httpMocks.createRequest();
-    const res = httpMocks.createResponse();
-    const error = new Error('Missing fields: [name]');
-    error.code = 400;
-
-    errorHandler()(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'BAD_REQUEST',
-      status_code: 400,
-      message: 'Missing fields: [name]',
-    });
-  });
-
-  test('When trace=true, should returns full error traces', async () => {
-    const req = httpMocks.createRequest();
-    const res = httpMocks.createResponse();
-    const error = new Error();
-    error.code = 500;
-
-    errorHandler({ trace: true })(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error.trace).toBeDefined();
-  });
-
-  test('When defined camel_case=true, should use camelCase response object', async () => {
-    const req = httpMocks.createRequest();
-    const res = httpMocks.createResponse();
-    const error = new Error();
-
-    errorHandler({ camel_case: true })(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-    expect(response.error.statusCode).toBeDefined();
+    await request(app)
+      .get('/')
+      .expect((res) => {
+        expect(res.headers['x-transaction-id']).toBeDefined();
+      });
   });
 });
 
-describe('X-Correlation-ID', () => {
-  test(' When req.headers.x-correlation-id exist, should add to error response object', async () => {
-    const req = httpMocks.createRequest({
-      headers: { 'X-Correlation-ID': '7616e2d3-6b90-43ba-8548-f6en12384f39' },
+describe('Pass foward correlation ID', () => {
+  test('When correlation ID already exist, should add existing ID to incoming request', async () => {
+    const app = express();
+    app.use(correlationId());
+    app.get('/', (req, res) => {
+      return res.status(200).json({ id: 'foo' });
     });
-    const res = httpMocks.createResponse();
 
-    const error = new Error();
-    errorHandler()(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'INTERNAL_SERVER_ERROR',
-      status_code: 500,
-      correlation_id: '7616e2d3-6b90-43ba-8548-f6en12384f39',
-    });
+    await request(app)
+      .get('/')
+      .set('x-correlation-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
+      .expect((res) => {
+        expect(res.headers['x-correlation-id']).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
+      });
   });
 
-  test(' When req.headers.x-correlation-id empty, should ignore x-correlation-id', async () => {
-    const req = httpMocks.createRequest({
-      headers: { 'X-Correlation-ID': ' ' },
+  test('When custom header ID already exist, should add existing ID to incoming request', async () => {
+    const app = express();
+    app.use(correlationId({ header: 'x-transaction-id' }));
+    app.get('/', (req, res) => {
+      return res.status(200).json({ id: 'foo' });
     });
-    const res = httpMocks.createResponse();
 
-    const error = new Error();
-    errorHandler()(error, req, res, {});
+    await request(app)
+      .get('/')
+      .set('x-transaction-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
+      .expect((res) => {
+        expect(res.headers['x-transaction-id']).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
+      });
+  });
+});
 
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'INTERNAL_SERVER_ERROR',
-      status_code: 500,
+describe('getId()', () => {
+  test('When new correlation ID, should add getId() function to request object', async () => {
+    const app = express();
+    app.use(correlationId());
+    app.get('/', (req, res) => {
+      return res.status(200).json({ id: req.getId() });
     });
+
+    await request(app)
+      .get('/')
+      .expect((res) => {
+        expect(res.body.id).toBeDefined();
+      });
   });
 
-  test(' When req.headers.x-correlation-id undefined, should ignore x-correlation-id', async () => {
-    const req = httpMocks.createRequest({
-      headers: { 'X-Correlation-ID': undefined },
+  test('When correlation ID already exist, should add getId() function to request object', async () => {
+    const app = express();
+    app.use(correlationId());
+    app.get('/', (req, res) => {
+      return res.status(200).json({ id: req.getId() });
     });
-    const res = httpMocks.createResponse();
 
-    const error = new Error();
-    errorHandler()(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'INTERNAL_SERVER_ERROR',
-      status_code: 500,
-    });
+    await request(app)
+      .get('/')
+      .set('x-correlation-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
+      .expect((res) => {
+        expect(res.body.id).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
+      });
   });
 
-  test('When req.correlationId exist, should add to error response object', async () => {
-    const req = { correlationId: '7616e2d3-6b90-43ba-8548-f6en12384f39' };
-    const res = httpMocks.createResponse();
-
-    const error = new Error();
-    errorHandler()(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'INTERNAL_SERVER_ERROR',
-      status_code: 500,
-      correlation_id: '7616e2d3-6b90-43ba-8548-f6en12384f39',
+  test('When new custom header ID, should add getId() function to request object', async () => {
+    const app = express();
+    app.use(correlationId({ header: 'x-transaction-id' }));
+    app.get('/', (req, res) => {
+      return res.status(200).json({ id: req.getId() });
     });
+
+    await request(app)
+      .get('/')
+      .expect((res) => {
+        expect(res.body.id).toBeDefined();
+      });
   });
 
-  test('When req.correlationId empty, should ignore x-correlation-id', async () => {
-    const req = { correlationId: ' ' };
-    const res = httpMocks.createResponse();
-
-    const error = new Error();
-    errorHandler()(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'INTERNAL_SERVER_ERROR',
-      status_code: 500,
+  test('When custom header ID already exist, should add getId() function to request object', async () => {
+    const app = express();
+    app.use(correlationId({ header: 'x-transaction-id' }));
+    app.get('/', (req, res) => {
+      return res.status(200).json({ id: req.getId() });
     });
-  });
 
-  test('When req.correlationId undefined, should ignore x-correlation-id', async () => {
-    const req = { correlationId: undefined };
-    const res = httpMocks.createResponse();
-
-    const error = new Error();
-    errorHandler()(error, req, res, {});
-
-    const response = JSON.parse(res._getData());
-
-    expect(response.error).toMatchObject({
-      code: 'INTERNAL_SERVER_ERROR',
-      status_code: 500,
-    });
+    await request(app)
+      .get('/')
+      .set('x-transaction-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
+      .expect((res) => {
+        expect(res.body.id).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
+      });
   });
 });

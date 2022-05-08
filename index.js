@@ -1,63 +1,41 @@
 /*
- * node-error-handler
- * Copyright 2019-2022 Leonardo Furnielis.
+ * node-correlation-id
+ * Copyright 2022 Leonardo Furnielis.
  * Licensed under MIT License
  */
 
 'use strcit';
 
-const httpStatus = require('./src/resources/http-status-code');
-const logging = require('./src/logging');
-const validation = require('./src/validation');
-const convertToCamelCase = require('./src/camel-case-convert');
+const uuid = require('uuid');
 
 /**
- * Express error handlers for JSON APIs in development and production environments.
+ * Express unique identifier value that is attached to requests.
  * @param {Object} [options]
- * @param {Boolean} options.debug - If true all errors are printed with stderr.
- * @param {Boolean} options.trace - If true the trace is attached to output.
- * @param {Boolean} options.camel_case - If true the camelCase approach is used by error handler.
+ * @param {Boolean} options.header - Configure the name header to be attached in requests.
  * @return {VoidFunction}
  */
 module.exports = (options = {}) => {
-  const trace = options.trace || false;
-  const debug = options.debug || false;
-  const camelCase = options.camel_case || false;
+  const correlationId = options.header || 'x-correlation-id';
 
-  // eslint-disable-next-line no-unused-vars
-  return (err, req, res, next) => {
-    const code = validation.isHTTPCode(err.code) || 500;
-
-    const errorHandler = {
-      error: {
-        code: httpStatus[code],
-        status_code: code,
-      },
+  return (req, res, next) => {
+    const getId = (id) => {
+      return () => {
+        return id;
+      };
     };
 
-    const correlationId = 'x-correlation-id';
-    if (req.headers && req.headers[correlationId] && req.headers[correlationId].trim() !== '') {
-      errorHandler.error.correlation_id = req.headers[correlationId].trim();
-    } else if (req.correlationId && req.correlationId.trim() !== '') {
-      errorHandler.error.correlation_id = req.correlationId.trim();
+    if (
+      !req.headers[correlationId] ||
+      (req.headers[correlationId] && req.headers[correlationId].trim() === '')
+    ) {
+      const id = uuid.v1();
+      res.setHeader(correlationId, id);
+      req.getId = getId(id);
+      next();
+    } else {
+      res.setHeader(correlationId, req.headers[correlationId]);
+      req.getId = getId(req.headers[correlationId]);
+      next();
     }
-
-    if (err.message && err.message !== '') {
-      errorHandler.error.message = err.message;
-    }
-
-    if (trace) {
-      errorHandler.error.trace = err.stack;
-    }
-
-    if (debug === true) {
-      logging.error(errorHandler);
-    }
-
-    if (camelCase === true) {
-      errorHandler.error = convertToCamelCase(errorHandler.error);
-    }
-
-    return res.status(code).json(errorHandler);
   };
 };
