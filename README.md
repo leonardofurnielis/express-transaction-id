@@ -6,6 +6,9 @@
 ![GitHub](https://img.shields.io/github/license/leonardofurnielis/express-transaction-id.svg)
 ![npm](https://img.shields.io/npm/dm/express-transaction-id.svg)
 
+
+Express middleware to set a transaction id, unique identifier value that is attached to requests.
+
 ## Installation 
 
 

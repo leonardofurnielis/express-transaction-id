@@ -18,9 +18,9 @@ module.exports = (options = {}) => {
   const transactionId = options.custom_header || 'x-transaction-id';
 
   return (req, res, next) => {
-    const getId = (id) => {
+    const getId = (transactionId) => {
       return () => {
-        return id;
+        return transactionId;
       };
     };
 

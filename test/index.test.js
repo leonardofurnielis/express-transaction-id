@@ -9,7 +9,7 @@ describe('Create new transaction ID', () => {
     const app = express();
     app.use(transactionId());
     app.get('/', (req, res) => {
-      return res.status(200).json({ id: 'foo' });
+      return res.status(200).json({ transaction_id: 'foo' });
     });
 
     await request(app)
@@ -23,7 +23,7 @@ describe('Create new transaction ID', () => {
     const app = express();
     app.use(transactionId({ custom_header: 'x-transaction-id' }));
     app.get('/', (req, res) => {
-      return res.status(200).json({ id: 'foo' });
+      return res.status(200).json({ transaction_id: 'foo' });
     });
 
     await request(app)
@@ -39,7 +39,7 @@ describe('Pass foward transaction ID', () => {
     const app = express();
     app.use(transactionId());
     app.get('/', (req, res) => {
-      return res.status(200).json({ id: 'foo' });
+      return res.status(200).json({ transaction_id: 'foo' });
     });
 
     await request(app)
@@ -54,7 +54,7 @@ describe('Pass foward transaction ID', () => {
     const app = express();
     app.use(transactionId({ custom_header: 'x-transaction-id' }));
     app.get('/', (req, res) => {
-      return res.status(200).json({ id: 'foo' });
+      return res.status(200).json({ transaction_id: 'foo' });
     });
 
     await request(app)
@@ -71,13 +71,13 @@ describe('getId()', () => {
     const app = express();
     app.use(transactionId());
     app.get('/', (req, res) => {
-      return res.status(200).json({ id: req.getId() });
+      return res.status(200).json({ transaction_id: req.getId() });
     });
 
     await request(app)
       .get('/')
       .expect((res) => {
-        expect(res.body.id).toBeDefined();
+        expect(res.body.transaction_id).toBeDefined();
       });
   });
 
@@ -85,14 +85,14 @@ describe('getId()', () => {
     const app = express();
     app.use(transactionId());
     app.get('/', (req, res) => {
-      return res.status(200).json({ id: req.getId() });
+      return res.status(200).json({ transaction_id: req.getId() });
     });
 
     await request(app)
       .get('/')
       .set('x-transaction-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
       .expect((res) => {
-        expect(res.body.id).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
+        expect(res.body.transaction_id).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
       });
   });
 
@@ -100,13 +100,13 @@ describe('getId()', () => {
     const app = express();
     app.use(transactionId({ custom_header: 'x-transaction-id' }));
     app.get('/', (req, res) => {
-      return res.status(200).json({ id: req.getId() });
+      return res.status(200).json({ transaction_id: req.getId() });
     });
 
     await request(app)
       .get('/')
       .expect((res) => {
-        expect(res.body.id).toBeDefined();
+        expect(res.body.transaction_id).toBeDefined();
       });
   });
 
@@ -114,14 +114,14 @@ describe('getId()', () => {
     const app = express();
     app.use(transactionId({ custom_header: 'x-transaction-id' }));
     app.get('/', (req, res) => {
-      return res.status(200).json({ id: req.getId() });
+      return res.status(200).json({ transaction_id: req.getId() });
     });
 
     await request(app)
       .get('/')
       .set('x-transaction-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
       .expect((res) => {
-        expect(res.body.id).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
+        expect(res.body.transaction_id).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
       });
   });
 });
