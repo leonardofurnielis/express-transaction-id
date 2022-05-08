@@ -1,5 +1,5 @@
 /*
- * node-correlation-id
+ * express-transaction-id
  * Copyright 2022 Leonardo Furnielis.
  * Licensed under MIT License
  */
@@ -15,7 +15,7 @@ const uuid = require('uuid');
  * @return {VoidFunction}
  */
 module.exports = (options = {}) => {
-  const correlationId = options.header || 'x-correlation-id';
+  const transactionId = options.custom_header || 'x-transaction-id';
 
   return (req, res, next) => {
     const getId = (id) => {
@@ -25,16 +25,16 @@ module.exports = (options = {}) => {
     };
 
     if (
-      !req.headers[correlationId] ||
-      (req.headers[correlationId] && req.headers[correlationId].trim() === '')
+      !req.headers[transactionId] ||
+      (req.headers[transactionId] && req.headers[transactionId].trim() === '')
     ) {
       const id = uuid.v1();
-      res.setHeader(correlationId, id);
+      res.setHeader(transactionId, id);
       req.getId = getId(id);
       next();
     } else {
-      res.setHeader(correlationId, req.headers[correlationId]);
-      req.getId = getId(req.headers[correlationId]);
+      res.setHeader(transactionId, req.headers[transactionId]);
+      req.getId = getId(req.headers[transactionId]);
       next();
     }
   };

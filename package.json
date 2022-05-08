@@ -1,7 +1,7 @@
 {
-  "name": "node-correlation-id",
+  "name": "express-transaction-id",
   "version": "0.0.1",
-  "description": "Express middleware to set a correlation id, unique identifier value that is attached to requests.",
+  "description": "Express middleware to set a transaction id, unique identifier value that is attached to requests.",
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
@@ -23,12 +23,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leonardofurnielis/node-correlation-id.git"
+    "url": "git+https://github.com/leonardofurnielis/express-transaction-id.git"
   },
   "bugs": {
-    "url": "https://github.com/leonardofurnielis/node-correlation-id/issues"
+    "url": "https://github.com/leonardofurnielis/express-transaction-id/issues"
   },
-  "homepage": "https://github.com/leonardofurnielis/node-correlation-id#readme",
+  "homepage": "https://github.com/leonardofurnielis/express-transaction-id#readme",
   "author": "Leonardo Furnielis <leonardofurnielis@outlook.com>",
   "license": "MIT",
   "devDependencies": {
