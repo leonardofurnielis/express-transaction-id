@@ -1,7 +1,7 @@
 # express-transaction-id
 
 ![npm](https://img.shields.io/npm/v/express-transaction-id)
-![workflow](https://github.com/leonardofurnielis/express-transaction-id/actions/workflows/test-coverage.yml/badge.svg)
+![workflow](https://github.com/leonardofurnielis/express-transaction-id/actions/workflows/build-test.yml/badge.svg)
 [![codecov](https://codecov.io/gh/leonardofurnielis/express-transaction-id/branch/master/graph/badge.svg)](https://codecov.io/gh/leonardofurnielis/express-transaction-id)
 ![GitHub](https://img.shields.io/github/license/leonardofurnielis/express-transaction-id.svg)
 ![npm](https://img.shields.io/npm/dm/express-transaction-id.svg)
