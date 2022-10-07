@@ -52,4 +52,4 @@ req.getId(); // 1c204313-6526-4f36-b32f-a36a410c4ed8
 
 ## License
 
-[MIT](LICENSE)
+[Apache-2.0](LICENSE)
