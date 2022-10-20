@@ -26,9 +26,9 @@ const  transactionId = require('express-transaction-id');
 const  app = express();
 
 app.use(transactionId({ header: 'x-global-transaction-id' }));
+
 // Setup your routes
 app.get('/foo', (req, res, next) => {
-
    return res.status(200).json({ transaction_id: req.getId() });
 });
 
