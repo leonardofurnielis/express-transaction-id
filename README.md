@@ -6,17 +6,15 @@
 ![GitHub](https://img.shields.io/github/license/leonardofurnielis/express-transaction-id.svg)
 ![npm](https://img.shields.io/npm/dm/express-transaction-id.svg)
 
-
 Express middleware to set a transaction id, unique identifier value that is attached to requests.
 
 ## Installation 
 
-
 ```bash
-$ npm install express-transaction-id --save
+npm install express-transaction-id --save
 ```
 
-## Use
+## Usage
 
 In an [express](https://www.npmjs.com/package/express) based application:
 
@@ -35,20 +33,22 @@ app.get('/foo', (req, res, next) => {
 });
 
 ```
-### req.getId()
-
-This methods is added to the incoming request by `express-transaction-id`, and will allow you to get `transaction_id` of current request.
-
-```js
-
-req.getId(); // 1c204313-6526-4f36-b32f-a36a410c4ed8
-```
 
 ## Options
 
 | Option | Type | Default | Description  |
 | ------ |------|---------| ------------ |
 | header | String | `x-transaction-id`| The name of the inbound header to check for a transaction id. |
+
+## Methods
+
+### getId()
+
+This methods is added to the incoming request by `express-transaction-id`, and will allow you to get `transaction_id` of current request.
+
+```js
+req.getId(); // 1c204313-6526-4f36-b32f-a36a410c4ed8
+```
 
 ## License
 
