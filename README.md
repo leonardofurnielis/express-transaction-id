@@ -25,9 +25,9 @@ const  transactionId = require('express-transaction-id');
   
 const  app = express();
 
+// Adding `express-transaction-id` middleware to generate transaction IDs
 app.use(transactionId({ header: 'x-global-transaction-id' }));
 
-// Setup your routes
 app.get('/foo', (req, res, next) => {
    return res.status(200).json({ transaction_id: req.getId() });
 });
@@ -52,4 +52,4 @@ req.getId(); // 1c204313-6526-4f36-b32f-a36a410c4ed8
 
 ## License
 
-[Apache-2.0](LICENSE)
+[MIT](LICENSE)
