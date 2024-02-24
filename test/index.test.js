@@ -4,12 +4,12 @@ const request = require('supertest');
 const express = require('express');
 const transactionId = require('../index');
 
-describe('Create new transaction ID', () => {
-  test('When use middleware, should add x-transaction-id to incoming request', async () => {
+describe('Create new `id` to incoming request', () => {
+  test('It should add x-transaction-id header to incoming request', async () => {
     const app = express();
     app.use(transactionId());
     app.get('/', (req, res) => {
-      return res.status(200).json({ transaction_id: 'foo' });
+      return res.status(201).json({});
     });
 
     await request(app)
@@ -19,27 +19,27 @@ describe('Create new transaction ID', () => {
       });
   });
 
-  test('When use custom header, should add custom header to incoming request', async () => {
+  test('It should add custom header to incoming request', async () => {
     const app = express();
-    app.use(transactionId({ custom_header: 'x-transaction-id' }));
+    app.use(transactionId({ custom_header: 'x-global-transaction-id' }));
     app.get('/', (req, res) => {
-      return res.status(200).json({ transaction_id: 'foo' });
+      return res.status(201).json({});
     });
 
     await request(app)
       .get('/')
       .expect((res) => {
-        expect(res.headers['x-transaction-id']).toBeDefined();
+        expect(res.headers['x-global-transaction-id']).toBeDefined();
       });
   });
 });
 
-describe('Pass foward transaction ID', () => {
-  test('When transaction ID already exist, should add existing ID to incoming request', async () => {
+describe('Foward `transaction-id`', () => {
+  test('When `transaction-id` already exist, it should add to incoming request', async () => {
     const app = express();
     app.use(transactionId());
     app.get('/', (req, res) => {
-      return res.status(200).json({ transaction_id: 'foo' });
+      return res.status(201).json({});
     });
 
     await request(app)
@@ -50,28 +50,28 @@ describe('Pass foward transaction ID', () => {
       });
   });
 
-  test('When custom header ID already exist, should add existing ID to incoming request', async () => {
+  test('When custom header id already exist, it should add existing `id` to incoming request', async () => {
     const app = express();
-    app.use(transactionId({ custom_header: 'x-transaction-id' }));
+    app.use(transactionId({ custom_header: 'x-global-transaction-id' }));
     app.get('/', (req, res) => {
-      return res.status(200).json({ transaction_id: 'foo' });
+      return res.status(201).json({});
     });
 
     await request(app)
       .get('/')
-      .set('x-transaction-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
+      .set('x-global-transaction-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
       .expect((res) => {
-        expect(res.headers['x-transaction-id']).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
+        expect(res.headers['x-global-transaction-id']).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
       });
   });
 });
 
 describe('getId()', () => {
-  test('When new transaction ID, should add getId() function to request object', async () => {
+  test('It should add getId() function to request object', async () => {
     const app = express();
     app.use(transactionId());
     app.get('/', (req, res) => {
-      return res.status(200).json({ transaction_id: req.getId() });
+      return res.status(201).json({ transaction_id: req.getId() });
     });
 
     await request(app)
@@ -81,7 +81,7 @@ describe('getId()', () => {
       });
   });
 
-  test('When transaction ID already exist, should add getId() function to request object', async () => {
+  test('When `transaction-id` already exist, it should add getId() function to request object', async () => {
     const app = express();
     app.use(transactionId());
     app.get('/', (req, res) => {
@@ -96,9 +96,9 @@ describe('getId()', () => {
       });
   });
 
-  test('When new custom header ID, should add getId() function to request object', async () => {
+  test('When custom header `id`, it should add getId() function to request object', async () => {
     const app = express();
-    app.use(transactionId({ custom_header: 'x-transaction-id' }));
+    app.use(transactionId({ custom_header: 'x-global-transaction-id' }));
     app.get('/', (req, res) => {
       return res.status(200).json({ transaction_id: req.getId() });
     });
@@ -110,16 +110,16 @@ describe('getId()', () => {
       });
   });
 
-  test('When custom header ID already exist, should add getId() function to request object', async () => {
+  test('When custom header `id` already exist, it should add getId() function to request object', async () => {
     const app = express();
-    app.use(transactionId({ custom_header: 'x-transaction-id' }));
+    app.use(transactionId({ custom_header: 'x-global-transaction-id' }));
     app.get('/', (req, res) => {
       return res.status(200).json({ transaction_id: req.getId() });
     });
 
     await request(app)
       .get('/')
-      .set('x-transaction-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
+      .set('x-global-transaction-id', '1c204313-6526-4f36-b32f-a36a410c4ed8')
       .expect((res) => {
         expect(res.body.transaction_id).toBe('1c204313-6526-4f36-b32f-a36a410c4ed8');
       });
