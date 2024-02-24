@@ -1,6 +1,6 @@
 {
   "name": "express-transaction-id",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Express middleware to set a transaction id, unique identifier value that is attached to requests.",
   "main": "index.js",
   "scripts": {
